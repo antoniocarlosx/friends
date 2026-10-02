@@ -1,3 +1,4 @@
+import { read } from "node:fs";
 import prisma from "../prisma.js";
 
 export async function createFriend(req, res, next) {
@@ -103,6 +104,49 @@ export async function findMyFriend(req, res, next) {
     }
 
     res.status(200).json(myFriend);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function updateMyFriend(req, res, next) {
+  try {
+    const mailFriend = req.params.email;
+
+    if (!req.body || Object.keys(req.body).length === 0) {
+      return res
+        .status(400)
+        .json({ message: "Nenhum dado foi enviado para atualizar" });
+    }
+
+    const { firstName, lastName, telefone, DOB } = req.body;
+
+    if (!mailFriend) {
+      return res.status(400).json({ message: "Parâmetros inválidos" });
+    }
+
+    const updatedFriend = await prisma.friend.updateMany({
+      where: {
+        email: mailFriend,
+        userId: req.userId,
+      },
+      data: {
+        firstName,
+        lastName,
+        telefone,
+        DOB,
+      },
+    });
+
+    if (updatedFriend.count === 0) {
+      return res
+        .status(404)
+        .json({ message: "Amigo não encontrado para atualizar" });
+    }
+
+    res.json({
+      message: "Amigo atualizado com sucesso",
+    });
   } catch (error) {
     next(error);
   }
