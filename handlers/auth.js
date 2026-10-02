@@ -60,7 +60,7 @@ export async function login(req, res, next) {
 
     const passwordMatch = await bcrypt.compare(password, user.password);
 
-    if (!password) {
+    if (!passwordMatch) {
       return res
         .status(208)
         .json({ message: "Login inválido, verifique o usuário e a senha" });
