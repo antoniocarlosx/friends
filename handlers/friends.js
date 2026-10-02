@@ -47,8 +47,8 @@ export async function createFriend(req, res, next) {
     const fixDOB = DOB.includes("/") ? DOB.replace("/", "-") : DOB;
     const formatedData = new Date(fixDOB);
 
-    if(isNaN(formatedData.getTime())){
-        res.status(400).json({message: "Data de nascimento inválida"})
+    if (isNaN(formatedData.getTime())) {
+      res.status(400).json({ message: "Data de nascimento inválida" });
     }
 
     const newFriend = await prisma.friend.create({
@@ -80,7 +80,29 @@ export async function listMyFriends(req, res, next) {
         .status(404)
         .json({ message: "Usuário sem amigos cadastrados" });
     }
-    res.json(allFriends);
+    res.status(200).json(allFriends);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function findMyFriend(req, res, next) {
+  try {
+    const mailFriend = req.params.email;
+
+    if (!mailFriend) {
+      return res.status(400).json({ message: "Parâmetros inválidos" });
+    }
+
+    const myFriend = await prisma.friend.findFirst({
+      where: { email: mailFriend, userId: req.user.userId },
+    });
+
+    if (!myFriend) {
+      return res.status(400).json({ message: "Amigo não encontrado" });
+    }
+
+    res.status(200).json(myFriend);
   } catch (error) {
     next(error);
   }
