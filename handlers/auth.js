@@ -12,10 +12,10 @@ export async function register(req, res, next) {
     if (!username || !password) {
       return res
         .status(404)
-        .json({ message: "Nome de usuário ou senha ausentes." });
+        .json({ message: "Erro ao logar: campos ausentes" });
     }
 
-    // 2. Verifica se o usuário que está se cadastrand já não existe 
+    // 2. Verifica se o usuário que está se cadastrand já não existe
     const existingUser = await prisma.user.findUnique({
       where: { username },
     });
@@ -27,7 +27,6 @@ export async function register(req, res, next) {
 
     // Caso esteja tudo certo, codifica a senha para armazena-la
     const hashedPassword = await bcrypt.hash(password, 10);
-
 
     // 3. Cria o novo usuário após validar que o usuário não está cadastrado e codificar a senha digitada, armazenando a codificação.
     await prisma.user.create({
