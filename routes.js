@@ -5,6 +5,7 @@ import {
   createFriend,
   findMyFriend,
   updateMyFriend,
+  deleteMyFriend,
 } from "./handlers/friends.js";
 
 export default function routes(app, opts) {
@@ -19,4 +20,5 @@ export default function routes(app, opts) {
   app.get("/friends", authGuard, listMyFriends);
   app.post("/friends", authGuard, createFriend);
   app.put("/friends/:email", authGuard, updateMyFriend);
+  app.delete("/friends/:email", authGuard, deleteMyFriend);
 }

@@ -112,6 +112,9 @@ export async function findMyFriend(req, res, next) {
 export async function updateMyFriend(req, res, next) {
   try {
     const mailFriend = req.params.email;
+    if (!mailFriend) {
+      return res.status(400).json({ message: "Parâmetros inválidos" });
+    }
 
     if (!req.body || Object.keys(req.body).length === 0) {
       return res
@@ -147,6 +150,31 @@ export async function updateMyFriend(req, res, next) {
     res.json({
       message: "Amigo atualizado com sucesso",
     });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function deleteMyFriend(req, res, next) {
+  try {
+    const mailFriend = req.params.email;
+
+    if (!mailFriend) {
+      return res.status(400).json({ message: "Parâmetros inválidos" });
+    }
+
+    const deletedFriend = await prisma.friend.deleteMany({
+      where: {
+        userId: req.user.userId,
+        email: mailFriend,
+      },
+    });
+
+    if (deletedFriend === 0) {
+      return res.status(400).json({ message: "Amigo não encontrado" });
+    }
+
+    res.json({ message: "Amigo excluído com sucesso!" });
   } catch (error) {
     next(error);
   }
