@@ -15,23 +15,23 @@ datasource db {
 }
 
 
-model User { 
-  userId    String  @id @default(auto()) @map("_id") @db.ObjectId
-  username String  @unique  
-  password  String
-  friends Friend[]
-  
-} 
+model User {
+  userId   String   @id @default(auto()) @map("_id") @db.ObjectId
+  username String   @unique
+  password String
+  friends  Friend[]
+}
 
 model Friend {
-  friendId    String  @id @default(auto()) @map("_id") @db.ObjectId
-  email String  @unique
+  friendId  String @id @default(auto()) @map("_id") @db.ObjectId
+  email     String
+  telefone  String
   firstName String
-  lastName String
-  DOB String
-  userId String @db.ObjectId
-  user User  @relation(fields: [userId], references: [userId], onDelete: Cascade)
- 
-  
+  lastName  String
+  DOB       DateTime
+  userId    String @db.ObjectId
+  user      User   @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+  @@unique([userId, email])
 }
 

@@ -1,0 +1,87 @@
+import prisma from "../prisma.js";
+
+export async function createFriend(req, res, next) {
+  try {
+    const requiredFields = [
+      "email",
+      "telefone",
+      "firstName",
+      "lastName",
+      "DOB",
+    ];
+
+    const missingFields = requiredFields.filter((field) => !req.body[field]);
+
+    if (missingFields.length > 0) {
+      return res.status(400).json({
+        message: "Falha ao criar: Campos obrigatórios ausentes",
+        missing: missingFields,
+      });
+    }
+
+    const { email, telefone, firstName, lastName, DOB } = req.body;
+
+    const loggedUserId = req.user?.userId;
+
+    if (!loggedUserId) {
+      return res.status(401).json({
+        message: "Usuário não identificado na sessão. Faça login novamente.",
+      });
+    }
+
+    const existingFriend = await prisma.friend.findUnique({
+      where: {
+        userId_email: {
+          userId: loggedUserId,
+          email: email,
+        },
+      },
+    });
+
+    if (existingFriend) {
+      return res
+        .status(409)
+        .json({ message: "Não é possível adicionar amigos com mesmo email" });
+    }
+
+    const fixDOB = DOB.includes("/") ? DOB.replace("/", "-") : DOB;
+    const formatedData = new Date(fixDOB);
+
+    if(isNaN(formatedData.getTime())){
+        res.status(400).json({message: "Data de nascimento inválida"})
+    }
+
+    const newFriend = await prisma.friend.create({
+      data: {
+        email,
+        telefone,
+        firstName,
+        lastName,
+        DOB: formatedData,
+        userId: loggedUserId,
+      },
+    });
+
+    return res.status(201).json(newFriend);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function listMyFriends(req, res, next) {
+  try {
+    const allFriends = await prisma.friend.findMany({
+      where: {
+        userId: req.user.userId,
+      },
+    });
+    if (allFriends.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "Usuário sem amigos cadastrados" });
+    }
+    res.json(allFriends);
+  } catch (error) {
+    next(error);
+  }
+}
