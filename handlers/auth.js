@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import prisma from "../prisma.js";
+import "dotenv/config";
 
 // Registro
 export async function register(req, res, next) {
@@ -82,9 +83,11 @@ export async function login(req, res, next) {
     }
 
     // 4. Cria o token de acesso no navegador com tempo limite de expiração
+
+    const secret = process.env.JWT_SECRET;
     const accessToken = jwt.sign(
       { userId: user.userId, username: user.username },
-      "access",
+      secret,
       { expiresIn: 60 * 60 },
     );
 
